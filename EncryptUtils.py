@@ -1,9 +1,12 @@
 from cryptography.fernet import Fernet
 from os.path import exists
+import shutil
+import os
 
 
 class EncryptUtils:
     KEYFILE_PATH = "./all_data/vendor_manager/loCakey.txt"
+    TMP_COPY_FILE = "./all_data/vendor_manager/tmp_file.dat"
 
     def __init__(self):
         super().__init__()
@@ -38,3 +41,19 @@ class EncryptUtils:
 
         encrypted_buffer = crypt.encrypt(buffer)
         return encrypted_buffer
+
+    def encrypt_file(self, source_file):
+
+        tmp_file = self.TMP_COPY_FILE
+        shutil.copyfile(source_file, tmp_file)
+
+        with open(tmp_file, 'rb') as handle:
+            buffer = handle.read()
+
+        encrypted_buffer = self.encrypt_buffer_stream(buffer)
+
+        with open(source_file, 'wb') as encrypted_handle:
+            encrypted_handle.write(encrypted_buffer)
+
+        os.remove(tmp_file)
+

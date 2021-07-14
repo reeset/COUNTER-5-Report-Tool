@@ -34,14 +34,15 @@ def save_json_file(file_dir: str, file_name: str, json_string: str):
 def read_json_file(file_path: str) -> str:
     json_string = "[]"
     try:
+        objEncrypt = EncryptUtils()
+        if not objEncrypt.is_encrypted():
+            objEncrypt.encrypt_file(file_path)
+
         file = open(file_path, 'rb')
         byte_string = file.read()
 
-        objEncrypt = EncryptUtils()
-        if objEncrypt.is_encrypted():
-            json_string = objEncrypt.decrypt_buffer_stream(byte_string).decode("utf-8")
-        else:
-            json_string = byte_string.decode("utf-8")
+        json_string = objEncrypt.decrypt_buffer_stream(byte_string).decode("utf-8")
+        
         file.close()
     except IOError:
         pass
