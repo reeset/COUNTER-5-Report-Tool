@@ -8,6 +8,7 @@ from os import path, makedirs, system
 from PyQt5.QtWidgets import QWidget, QMessageBox, QFileDialog
 from PyQt5.QtCore import QDate
 from Constants import *
+from EncryptUtils import EncryptUtils
 
 main_window: QWidget = None
 
@@ -21,7 +22,9 @@ def save_json_file(file_dir: str, file_name: str, json_string: str):
     try:
         if not path.isdir(file_dir):
             makedirs(file_dir)
-        file = open(file_dir + file_name, 'w')
+        file = open(file_dir + file_name, 'wb')
+        objEncrypt = EncryptUtils()
+        json_string= objEncrypt.encrypt_buffer_stream(bytes(json_string,  'utf-8'))
         file.write(json_string)
         file.close()
     except IOError as e:
@@ -31,8 +34,14 @@ def save_json_file(file_dir: str, file_name: str, json_string: str):
 def read_json_file(file_path: str) -> str:
     json_string = "[]"
     try:
-        file = open(file_path, 'r', encoding='utf-8-sig')
-        json_string = file.read()
+        file = open(file_path, 'rb')
+        byte_string = file.read()
+
+        objEncrypt = EncryptUtils()
+        if objEncrypt.is_encrypted():
+            json_string = objEncrypt.decrypt_buffer_stream(byte_string).decode("utf-8")
+        else:
+            json_string = byte_string.decode("utf-8")
         file.close()
     except IOError:
         pass
